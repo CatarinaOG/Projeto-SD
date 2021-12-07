@@ -2,6 +2,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
 
@@ -9,7 +11,7 @@ public class Server {
 
         try {
             ServerSocket serverSocket = new ServerSocket(12345);
-            AeroportManager manager;
+            AirportManager manager;
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -26,9 +28,9 @@ public class Server {
 
 class ServerWorker implements Runnable {
     private Socket socket;
-    private AeroportManager manager;
+    private AirportManager manager;
 
-    public ServerWorker (Socket socket, AeroportManager manager) {
+    public ServerWorker (Socket socket, AirportManager manager) {
         this.socket = socket;
         this.manager = manager;
     }
@@ -48,17 +50,3 @@ class ServerWorker implements Runnable {
 }
 
 
-class AeroportManager {
-    private HashMap<String, Voo> flies;
-
-    public ContactManager() {
-
-    }
-
-
-    public void update() {
-    }
-
-
-
-}
