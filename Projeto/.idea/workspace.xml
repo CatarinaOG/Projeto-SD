@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d8b20644-52e5-49c6-815f-80aa71fc3aea" name="Changes" comment="" />
+    <list id="70f3f24e-46ab-49ac-9c23-68dbbe1cf55c" name="Changes by brunofilipemirandapereira" comment="" />
+    <list id="132e7e84-f1d6-4f63-b2fc-7a535a63bd6e" name="Changes by chico" comment="" />
+    <list id="37521831-9cdc-4ea2-94da-0ffff499bd46" name="Changes by João Delgado" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +23,24 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/src/Server.java">
+      <ranges>
+        <range start1="1" end1="1" start2="1" end2="3" changelist="d8b20644-52e5-49c6-815f-80aa71fc3aea" />
+        <range start1="13" end1="14" start2="15" end2="18" changelist="d8b20644-52e5-49c6-815f-80aa71fc3aea" />
+        <range start1="24" end1="25" start2="28" end2="28" changelist="d8b20644-52e5-49c6-815f-80aa71fc3aea" />
+        <range start1="40" end1="43" start2="43" end2="74" changelist="70f3f24e-46ab-49ac-9c23-68dbbe1cf55c" />
+        <range start1="44" end1="44" start2="75" end2="90" changelist="70f3f24e-46ab-49ac-9c23-68dbbe1cf55c" />
+        <range start1="45" end1="46" start2="91" end2="92" changelist="37521831-9cdc-4ea2-94da-0ffff499bd46" />
+      </ranges>
+    </file>
+    <file path="$PROJECT_DIR$/src/User.java">
+      <ranges>
+        <range start1="0" end1="0" start2="0" end2="2" changelist="70f3f24e-46ab-49ac-9c23-68dbbe1cf55c" />
+        <range start1="39" end1="39" start2="41" end2="52" changelist="132e7e84-f1d6-4f63-b2fc-7a535a63bd6e" />
+      </ranges>
+    </file>
+  </component>
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="2" />
   </component>
@@ -32,7 +53,43 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Projeto-DSS/Project" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="codeWithMe.voiceChat.enabledByDefault" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RunManager" selected="Application.Server">
+    <configuration name="Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Client" />
+      <module name="TP-SD-2021" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Server" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Server" />
+      <module name="TP-SD-2021" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Client" />
+        <item itemvalue="Application.Server" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -42,7 +99,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1638913353581</updated>
+      <workItem from="1641333219621" duration="6214000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>

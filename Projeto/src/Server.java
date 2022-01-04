@@ -1,4 +1,6 @@
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -11,7 +13,9 @@ public class Server {
 
         try {
             ServerSocket serverSocket = new ServerSocket(12345);
-            AirportManager manager;
+            AirportManager manager = new AirportManager();
+
+            manager.addUser("eu","la");
 
             while (true) {
                 Socket socket = serverSocket.accept();
@@ -22,7 +26,6 @@ public class Server {
             System.out.println(e.getStackTrace());
         }
     }
-
 }
 
 
@@ -38,12 +41,55 @@ class ServerWorker implements Runnable {
     public void run() {
 
         try {
-            DataInputStream b = new DataInputStream(socket.getInputStream());
-            //Contact c = Contact.deserialize(b);
-            //manager.update(c);
 
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
+            String username;
+            String password;
+
+
+            int option = in.readInt();;
+            while(option != 0) {
+
+                switch (option) {
+
+                    case 1: //-----------------------------Iniciar Sessao Normal----------------------------------------
+                        username = in.readUTF();
+                        password = in.readUTF();
+
+                        if (manager.login(username, password)) out.writeUTF("Acesso legalmente aceite");
+                        else out.writeUTF("Acesso negado");
+                        out.flush();
+                        break;
+
+
+                    case 2://-----------------------------Iniciar Sessao Gestor-----------------------------------------
+                        username = in.readUTF();
+                        password = in.readUTF();
+
+                        if (manager.loginGestor(username, password)) out.writeUTF("Acesso legalmente aceite");
+                        else out.writeUTF("Acesso negado");
+                        out.flush();
+                        break;
+
+
+                    case 3: //-----------------------------------Sign In------------------------------------------------
+                        username = in.readUTF();
+                        password = in.readUTF();
+
+                        manager.addUser(username, password);
+                        out.writeUTF("Sign in com sucesso");
+                        out.flush();
+                        break;
+
+                    default:
+
+                }
+                option = in.readInt();
+            }
         } catch(Exception e){
-            e.printStackTrace();
+            System.out.println("Não haverá mais ações");
         }
 
     }

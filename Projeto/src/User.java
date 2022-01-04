@@ -1,3 +1,5 @@
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,17 @@ public class User {
         this.idFlights = idFlights;
     }
 
+    /*
+    public void serializeUser(DataOutputStream out){
+        try {
+            out.writeUTF(this.username);
+            out.writeUTF(this.password);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+     */
 
     public String toString() {
         return "User{" +
