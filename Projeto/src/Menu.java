@@ -10,6 +10,7 @@ public class Menu {
     public interface PreCondition {
         boolean validate();
     }
+
     private static Scanner is = new Scanner(System.in);
 
 

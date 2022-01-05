@@ -2,18 +2,25 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.*;
 
 public class User {
 
     private String username;
     private String password;
-    private List<String> idFlights;
+    private Map<String, Booking > bookings;
 
     public User(String username, String password){
         this.username = username;
         this.password = password;
-        this.idFlights = new ArrayList<>();
+        this.bookings = new HashMap<>();
     }
+
+
+    public void deleteBooking(String idBooking){
+        this.bookings.remove(idBooking);
+    }
+
 
     public String getUsername() {
         return username;
@@ -24,38 +31,26 @@ public class User {
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public List<String> getIdFlights() {
-        return idFlights;
+    public Map<String, Booking> getBookings() {
+        return this.bookings;
     }
 
-    public void setIdFlights(List<String> idFlights) {
-        this.idFlights = idFlights;
+    public void setBookings(Map<String, Booking> bookings) {
+        this.bookings = bookings;
     }
-
-    /*
-    public void serializeUser(DataOutputStream out){
-        try {
-            out.writeUTF(this.username);
-            out.writeUTF(this.password);
-            out.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-     */
 
     public String toString() {
         return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", idFlights=" + idFlights +
+                "username='" + this.username + '\'' +
+                ", password='" + this.password + '\'' +
+                ", bookings=" + this.bookings +
                 '}';
     }
 }

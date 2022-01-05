@@ -10,10 +10,10 @@ public class Client {
         DataInputStream in = new DataInputStream(clientS.getInputStream());
         DataOutputStream out = new DataOutputStream(clientS.getOutputStream());
 
-        BufferedReader systemIn = new BufferedReader(new InputStreamReader(System.in));
-
         ClientHandler clientHandler = new ClientHandler(in,out);
         clientHandler.run();
+
+        clientS.close();
 
 
 
