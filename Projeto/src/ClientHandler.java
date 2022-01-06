@@ -44,10 +44,11 @@ public class ClientHandler {
         String response = this.in.readUTF();
         System.out.println("Response: " + response);
 
-        String[] options = {"List all flights", "Book a flight"};
+        String[] options = {"List all flights", "Book a flight", "Cancel Booking"};
         Menu usersMenu = new Menu("User's Menu", options);
 
         usersMenu.setHandler(1, this::listAllFlights);
+        usersMenu.setHandler(3, this::cancelBooking);
 
         usersMenu.run();
 
@@ -147,6 +148,21 @@ public class ClientHandler {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    public void cancelBooking(){
+        System.out.print("Insert the booking ID: ");
+        String bookingId = this.systemIn.nextLine();
+
+        try {
+            this.out.writeInt(8);
+            this.out.writeUTF(bookingId);
+
+            System.out.println(this.in.readUTF());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

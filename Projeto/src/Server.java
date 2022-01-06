@@ -61,6 +61,7 @@ class ServerWorker implements Runnable {
                     case 5: deleteBookingsDay(); break;
                     case 6: bookFlight(); break;
                     case 7: listAllFlights(); break;
+                    case 8: cancelBooking(); break;
                     default: break;
                 }
                 option = in.readInt();
@@ -180,6 +181,19 @@ class ServerWorker implements Runnable {
 
     public void listAllFlights(){
         this.manager.sendListAllFlights(this.out);
+    }
+
+    public void cancelBooking(){
+        try {
+
+            String bookingId = in.readUTF(); //ler o id da reserva
+            int existe = this.manager.cancelBooking(bookingId);
+            if(existe == 1) out.writeUTF("Reserva " + bookingId + "cancelada com sucesso!");
+            else out.writeUTF("Rserva com ID " + bookingId + " não existe!");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

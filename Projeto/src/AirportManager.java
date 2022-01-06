@@ -21,6 +21,12 @@ public class AirportManager {
         this.routes = new ArrayList<>();
     }
 
+    /**
+     * metodo para fazer login de um utilizador
+     * @param username
+     * @param password
+     * @return
+     */
     public boolean login(String username, String password ){
 
         User u;
@@ -35,6 +41,12 @@ public class AirportManager {
         return false;
     }
 
+    /**
+     * Metodo para fazer login do admin
+     * @param username
+     * @param password
+     * @return
+     */
     public boolean loginGestor(String username, String password){
         l.lock();
         try {
@@ -44,6 +56,11 @@ public class AirportManager {
         }
     }
 
+    /**
+     * Registar um utilizador
+     * @param username
+     * @param password
+     */
     public void addUser(String username, String password){
 
         l.lock();
@@ -51,12 +68,24 @@ public class AirportManager {
         l.unlock();
     }
 
+    /**
+     * Registar um admin
+     * @param username
+     * @param password
+     */
     public void addAdmin(String username, String password){
         l.lock();
         this.admin = new AbstractMap.SimpleEntry<>(username, password);
         l.unlock();
     }
 
+    /**
+     * Resgistar uma nova rota, info sobre um voo (origem, destino, capacidade).
+     * @param origin
+     * @param destination
+     * @param capacity
+     * @return
+     */
     public boolean addRoute(String origin, String destination, int capacity){
 
         l.lock();
@@ -67,6 +96,10 @@ public class AirportManager {
         }
     }
 
+    /**
+     * Apagar reservas de um dia -> cancelar um dia.
+     * @param date
+     */
     public void deleteBookings(LocalDate date){
         List<Booking> bookingsDeleted = new ArrayList<>();
 
@@ -84,6 +117,13 @@ public class AirportManager {
         this.l.unlock();
     }
 
+    /**
+     *
+     * @param cities
+     * @param startDate
+     * @param endDate
+     * @return
+     */
     public boolean bookFlight(List<String> cities, LocalDate startDate, LocalDate endDate){
 
         int currentCity = 0;
@@ -97,11 +137,18 @@ public class AirportManager {
         return true;
     }
 
+    /**
+     *
+     */
     public void nextDay(){
         this.day = this.day.plusDays(1);
     }
 
 
+    /**
+     * Metodo que envia a listagem das rotas disponiveis para voos
+     * @param out
+     */
     public void sendListAllFlights(DataOutputStream out){
         int n_flights = this.routes.size();
         try {
@@ -112,6 +159,27 @@ public class AirportManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     *
+     * @param bookingId
+     * @return 0 se nao existir , 1 se existir
+     */
+    public int cancelBooking(String bookingId){
+        this.l.lock();
+        int res = 0;
+        for(Route r : this.routes){
+            r.lock(); //obter lock de todas as routes
+        }
+        this.l.unlock(); //libertar o lock da classe airportManager
+
+        for (Route r : this.routes){
+            res = r.cancelBooking(bookingId); //cancelar a reserva se existir nesta rota
+            r.unlock(); //libertar o lock de uma route -> opde ser adquirido por outra thread
+        }
+
+        return res; //
     }
 
 }

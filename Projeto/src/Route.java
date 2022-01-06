@@ -5,12 +5,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Route {
 
     private String origin;
     private String destination;
     private int capacity;
+    private Lock l = new ReentrantLock();
     private Map<LocalDate,Flight> flights;
 
 
@@ -79,5 +82,20 @@ public class Route {
                 ", destination='" + destination + '\'' +
                 ", capacity=" + capacity +
                 '}';
+    }
+
+    public void lock(){
+        this.l.lock();
+    }
+
+    public void unlock(){
+        this.l.unlock();
+    }
+
+    public int cancelBooking(String bookingId){
+        for(Flight f : this.flights.values()){
+            if(f.cancelBooking(bookingId) == 1) return 1;
+        }
+        return 0;
     }
 }
