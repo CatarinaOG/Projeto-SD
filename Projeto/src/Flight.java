@@ -1,13 +1,15 @@
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Flight {
 
-    private int occupancy;
+    private int occupation;
     private Map<Integer,Booking> bookings;
 
     public Flight(){
-        this.occupancy = 0;
+        this.occupation = 0;
         this.bookings = new HashMap<>();
     }
 

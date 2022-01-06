@@ -1,3 +1,5 @@
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,6 +33,17 @@ public class Route {
         this.flights.put(date, null);
         return list;
     }
+
+    public void serializeRoute(DataOutputStream out){
+        try {
+            out.writeUTF(this.origin);
+            out.writeUTF(this.destination);
+            out.writeInt(this.capacity);
+        } catch (IOException e) {
+
+        }
+    }
+
 
     public Route copyFlight(){
         return new Route(this.origin, this.destination, this.capacity);

@@ -60,6 +60,7 @@ class ServerWorker implements Runnable {
                     case 4: addRoute(); break;
                     case 5: deleteBookingsDay(); break;
                     case 6: bookFlight(); break;
+                    case 7: listAllFlights(); break;
                     default: break;
                 }
                 option = in.readInt();
@@ -175,6 +176,10 @@ class ServerWorker implements Runnable {
         }
 
 
+    }
+
+    public void listAllFlights(){
+        this.manager.sendListAllFlights(this.out);
     }
 
 }

@@ -1,3 +1,6 @@
+import javax.xml.crypto.Data;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -86,7 +89,7 @@ public class AirportManager {
         int currentCity = 0;
         for(int i = 0; i < cities.size()-1 ; i++){
 
-            this.routes.stream().
+            //this.routes.stream().
 
         }
 
@@ -99,5 +102,16 @@ public class AirportManager {
     }
 
 
+    public void sendListAllFlights(DataOutputStream out){
+        int n_flights = this.routes.size();
+        try {
+            out.writeInt(n_flights);
+            for(Route r : this.routes){
+                r.serializeRoute(out);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

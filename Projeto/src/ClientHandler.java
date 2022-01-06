@@ -44,6 +44,14 @@ public class ClientHandler {
         String response = this.in.readUTF();
         System.out.println("Response: " + response);
 
+        String[] options = {"List all flights", "Book a flight"};
+        Menu usersMenu = new Menu("User's Menu", options);
+
+        usersMenu.setHandler(1, this::listAllFlights);
+
+        usersMenu.run();
+
+
     }
 
     public void loginGestor() throws IOException {
@@ -97,13 +105,13 @@ public class ClientHandler {
 
     public void addRoute() throws IOException {
 
-        System.out.println("Insert origin of the route");
+        System.out.println("Insert the origin of the route:");
         String origin = systemIn.nextLine();
 
-        System.out.println("Insert destination of the route");
+        System.out.println("Insert the destination of the route:");
         String destination = systemIn.nextLine();
 
-        System.out.println("Insert destination of the route");
+        System.out.println("Insert the capacity of the flight:");
         int capacity = Integer.parseInt(systemIn.nextLine());
 
         this.out.writeInt(4); // 4 -> add route
@@ -124,6 +132,22 @@ public class ClientHandler {
 
     }
 
+
+    public void listAllFlights(){
+        try{
+            this.out.writeInt(7);
+
+            int n_flights = this.in.readInt();
+            System.out.println("There are " + n_flights + " flights available!");
+
+            for(int i = 0; i < n_flights; i++){
+                System.out.println(this.in.readUTF() + " -> " + this.in.readUTF() + " (Capacity: " + this.in.readInt() + ")");
+            }
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
 
 
