@@ -56,12 +56,12 @@ class ServerWorker implements Runnable {
                 switch (option) {
                     case 1: username = login(); break;
                     case 2: loginGestor(); break;
-                    case 3: signIn(); break;
+                    case 3: signUp(); break;
                     case 4: addRoute(); break;
                     case 5: deleteBookingsDay(); break;
                     case 6: bookFlight(username); break;
                     case 7: listAllFlights(); break;
-                    case 8: cancelBooking(); break;
+                    case 8: cancelBooking(username); break;
                     default: break;
                 }
                 option = in.readInt();
@@ -70,7 +70,6 @@ class ServerWorker implements Runnable {
             e.printStackTrace();
             System.out.println("Client Exited");
         }
-
     }
 
     public String login() {
@@ -82,8 +81,13 @@ class ServerWorker implements Runnable {
             if (manager.login(username, password)) out.writeBoolean(true);
             else out.writeBoolean(false);
             out.flush();
-        }catch(IOException e){
-            System.out.println("Error logging In");
+        }catch(IOException e) {
+            try{
+                this.out.writeBoolean(false);
+            }
+            catch(IOException exp){
+                exp.printStackTrace();
+            }
         }
         return username;
     }
@@ -99,22 +103,32 @@ class ServerWorker implements Runnable {
             else out.writeBoolean(false);
             out.flush();
         }catch(IOException e) {
-            System.out.println("Error loging in");
+            try{
+                this.out.writeBoolean(false);
+            }
+            catch(IOException exp){
+                exp.printStackTrace();
+            }
         }
     }
 
-    public void signIn(){
+    public void signUp(){
 
         try {
             String username = in.readUTF();
             String password = in.readUTF();
 
-            manager.addUser(username, password);
-            this.out.writeBoolean(true);
+            boolean success = manager.addUser(username, password);
+            this.out.writeBoolean(success);
             out.flush();
 
         }catch( IOException e){
-            System.out.println("Error signing in");
+            try{
+                this.out.writeBoolean(false);
+            }
+            catch(IOException exp){
+                exp.printStackTrace();
+            }
         }
 
     }
@@ -127,18 +141,16 @@ class ServerWorker implements Runnable {
             String destination = in.readUTF();
             int capacity = in.readInt();
 
-            if (manager.addRoute(origin, destination, capacity)) out.writeUTF("Route created!");
-            else out.writeUTF("Route creation failed!");
+            if (manager.addRoute(origin, destination, capacity)) out.writeBoolean(true);
+            else out.writeBoolean(false);
             out.flush();
 
         }catch( IOException e){
             System.out.println("Error adding route");
         }
-
     }
 
     public void deleteBookingsDay(){
-
         try {
 
             LocalDate date = LocalDate.parse(in.readUTF());
@@ -149,13 +161,10 @@ class ServerWorker implements Runnable {
         }catch( IOException e){
             System.out.println("Error at deleting bookings in this day");
         }
-
     }
 
     public void bookFlight(String userID){
-
         try {
-
             int nrScales = in.readInt();
             List<String> cities = new ArrayList<>();
 
@@ -167,11 +176,12 @@ class ServerWorker implements Runnable {
             LocalDate endDate = LocalDate.parse(in.readUTF());
 
             String bookingId;
+            Map.Entry<LocalDate, String> r = manager.bookFlight(cities, startDate, endDate,userID);
 
-            switch (bookingId = manager.bookFlight(cities, startDate, endDate,userID)) {
-                case "1": out.writeUTF("There arent routes that apply to your flights"); break;
-                case "2": out.writeUTF("There aren't seats for all of your flights in the time span provided"); break;
-                default : out.writeUTF("Your reservation is done, your reservation code is: " + bookingId); break;
+            if(r.getValue().equals("1") || r.getValue().equals("2")) out.writeUTF(r.getValue());
+            else{
+                out.writeUTF(r.getValue());
+                out.writeUTF(r.getKey().toString());
             }
 
             out.flush();
@@ -179,21 +189,37 @@ class ServerWorker implements Runnable {
         }catch( IOException e){
             System.out.println("Error booking flight");
         }
-
-
     }
 
     public void listAllFlights(){
-        this.manager.sendListAllFlights(this.out);
+
+        List<String> list = this.manager.sendListAllFlights();
+
+        try {
+            out.writeInt(list.size()/3);
+
+            for( int i=0 ; i<list.size() ; i+=3 ){
+
+                out.writeUTF(list.get(i));
+                out.writeUTF(list.get(i+1));
+                out.writeInt(Integer.parseInt(list.get(i+2)));
+
+            }
+
+            out.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
-    public void cancelBooking(){
+    public void cancelBooking(String username){
         try {
 
             String bookingId = in.readUTF(); //ler o id da reserva
-            int existe = this.manager.cancelBooking(bookingId);
-            if(existe == 1) out.writeBoolean(true);
-            else out.writeBoolean(false);
+            out.writeBoolean(this.manager.cancelBooking(bookingId, username));
 
         } catch (IOException e) {
             e.printStackTrace();

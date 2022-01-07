@@ -1,10 +1,7 @@
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,14 +35,15 @@ public class Route {
         return list;
     }
 
-    public void serializeRoute(DataOutputStream out){
-        try {
-            out.writeUTF(this.origin);
-            out.writeUTF(this.destination);
-            out.writeInt(this.capacity);
-        } catch (IOException e) {
+    public List<String> serializeRoute(){
+        
+        List<String> list = new ArrayList<>();
+        
+        list.add(this.origin);
+        list.add(this.destination);
+        list.add(String.valueOf(this.capacity));
 
-        }
+        return list;
     }
 
     public void lock(){
@@ -56,11 +54,11 @@ public class Route {
         this.l.unlock();
     }
 
-    public int cancelBooking(String bookingId){
-        for(Flight f : this.flights.values()){
-            if(f.cancelBooking(bookingId) == 1) return 1;
-        }
-        return 0;
+    public boolean cancelBooking(String bookingId){
+        for(Flight f : this.flights.values())
+            if(f != null && f.cancelBooking(bookingId) == 1) return true;
+
+        return false;
     }
 
     public boolean isCompatible(String origin, String destination){
@@ -75,25 +73,20 @@ public class Route {
         flights.put(date,new Flight());
     }
 
-    public Map<LocalDate, Flight> getFlightsBetweenDates(String origin, String destination, LocalDate startDate, LocalDate endDate){
-        Map<LocalDate, Flight> map = new HashMap<>();
-        for(Map.Entry<LocalDate, Flight> e : this.flights.entrySet()){
-            if(e.getKey().isAfter(startDate.plusDays(1)) && e.getKey().isBefore(endDate.minusDays(1)) && e.getValue().getOccupancy() < this.capacity){
-                map.put(e.getKey(), e.getValue());
-            }
-        }
-        return map;
-    }
-
-    public void bookFlight(String bookingID, LocalDate date,String userID){
+    public Booking bookFlight(String bookingID, LocalDate date,String userID){
         Flight f = this.flights.get(date);
-        f.addBooking(bookingID, date, origin, destination, userID);
+        Booking b = f.addBooking(bookingID, date, origin, destination, userID);
         this.flights.put(date,f);
+        return b;
     }
 
     public boolean hasSeat(LocalDate date){
 
         return flights.get(date).hasSeat(capacity);
+    }
+
+    public boolean isNull(LocalDate date){
+        return flights.containsKey(date) && flights.get(date) == null;
     }
 
 

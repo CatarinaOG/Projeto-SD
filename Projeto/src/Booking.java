@@ -7,22 +7,22 @@ public class Booking {
     private LocalDate flightDate;
     private String origin;
     private String destination;
-    private String userId;
+    private String username;
 
-    public Booking(String bookingId, LocalDate flightDate, String origin, String destination, String userId){
+    public Booking(String bookingId, LocalDate flightDate, String origin, String destination, String username){
         this.bookingId = bookingId;
         this.flightDate = flightDate;
         this.origin = origin;
         this.destination = destination;
-        this.userId = userId;
+        this.username = username;
     }
 
     public Booking(Booking b){
-        this.userId = b.getUserId();
+        this.username = b.getUsername();
         this.flightDate = b.getFlightDate();
         this.origin = b.getOrigin();
         this.destination = b.getDestination();
-        this.userId = b.getUserId();
+        this.username = b.getUsername();
     }
 
     public String getBookingId() {
@@ -57,12 +57,12 @@ public class Booking {
         this.destination = destination;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Booking clone(){

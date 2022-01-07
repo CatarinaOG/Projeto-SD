@@ -61,11 +61,13 @@ public class AirportManager {
      * @param username
      * @param password
      */
-    public void addUser(String username, String password){
-
+    public boolean addUser(String username, String password){
+        boolean ret = true;
         l.lock();
-        users.put(username,new User(username,password));
+        if(!users.containsKey(username)) users.put(username,new User(username,password));
+        else ret = false;
         l.unlock();
+        return ret;
     }
 
     /**
@@ -88,11 +90,11 @@ public class AirportManager {
      */
     public boolean addRoute(String origin, String destination, int capacity){
 
-        l.lock();
+        this.l.lock();
         try {
-            return (routes.add(new Route(origin, destination, capacity)));
+            return (this.routes.add(new Route(origin, destination, capacity)));
         }finally {
-            l.unlock();
+            this.l.unlock();
         }
     }
 
@@ -111,7 +113,7 @@ public class AirportManager {
 
         for( Booking b : bookingsDeleted ){
             String idBooking = b.getBookingId();
-            this.users.get(b.getUserId()).deleteBooking(idBooking);
+            this.users.get(b.getUsername()).deleteBooking(idBooking);
         }
 
         this.l.unlock();
@@ -124,23 +126,29 @@ public class AirportManager {
      * @param endDate
      * @return
      */
-    public String bookFlight(List<String> cities, LocalDate startDate, LocalDate endDate, String userID){
+    public Map.Entry<LocalDate, String> bookFlight(List<String> cities, LocalDate startDate, LocalDate endDate, String userID){
 
         List<Route> usedRoutes = new ArrayList<>();
 
         boolean compatible;
-
+        this.l.lock();
         for(int i = 0; i < cities.size()-1 ; i++) {
             compatible = false;
             for (Route r : routes) {
                 if (r.isCompatible(cities.get(i), cities.get(i+1))) {
                     compatible = true;
                     usedRoutes.add(r);
+                    r.lock(); //adquirir o lock da route onde se vai alterar coisas
                 }
             }
-            if (!compatible) return "1";
+            if (!compatible){
+                for(Route r : usedRoutes) r.unlock(); //libertar os locks das routes
+                this.l.unlock(); // libertar o lock da airportManager
+                return new AbstractMap.SimpleEntry<>(null, "1");
+            }
         }
 
+        this.l.unlock(); // libertar o lock do airportManager
 
         boolean solution = true;
         LocalDate sol = null;
@@ -149,7 +157,7 @@ public class AirportManager {
 
             for( Route r : usedRoutes ){
                 if( !r.hasFlight(d) ) r.createFlight(d);
-                else if (!r.hasSeat(d)) solution = false;
+                else if (!r.hasSeat(d) && r.isNull(d)) solution = false;
             }
 
             if( solution ) {
@@ -159,35 +167,44 @@ public class AirportManager {
         }
 
         String bookingID;
+        Booking b;
 
-        if( !solution ) return "2";
+        if( !solution ){
+            for(Route r : usedRoutes) r.unlock(); //libertar os locks das routes
+            return new AbstractMap.SimpleEntry<>(null, "2");
+        }
         else {
+
             bookingID = UUID.randomUUID().toString();
-            for (Route r : usedRoutes)
-                r.bookFlight(bookingID, sol, userID);
+            for (Route r : usedRoutes) {
+                b = r.bookFlight(bookingID, sol, userID);
+
+                User u = users.get(b.getUsername());
+                u.addBooking(b);
+                users.put(b.getBookingId(),u);
+
+                r.unlock();
+            }
+
         }
 
-        return bookingID;
+        return new AbstractMap.SimpleEntry<>(sol, bookingID);
     }
 
-    /**
-     * Metodo que envia a listagem das rotas disponiveis para voos
-     * @param out
-     */
-    public void sendListAllFlights(DataOutputStream out){
-        int n_flights = this.routes.size();
-        try {
-            this.l.lock();                       // obter o lock do airport para certificar que nenhuma operação altera o estado das routes antes de as bloquear
-            out.writeInt(n_flights);
-            for(Route r : this.routes) r.lock(); // obter o lock de todas as routes
-            this.l.unlock();                     // libertar o lock do airport
-            for(Route r : this.routes){
-                r.serializeRoute(out);
-                r.unlock();                      // libertar o lock da route depois de a analisar
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    public List<String> sendListAllFlights() {
+        this.l.lock();                       // obter o lock do airport para certificar que nenhuma operação altera o estado das routes antes de as bloquear
+
+        List<String> list = new ArrayList<>();
+
+        for (Route r : this.routes) r.lock(); // obter o lock de todas as routes
+        this.l.unlock();                     // libertar o lock do airport
+        for (Route r : this.routes) {
+            for (String s : r.serializeRoute())
+                list.add(s);
+            r.unlock();                      // libertar o lock da route depois de a analisar
         }
+
+        return list;
     }
 
     /**
@@ -195,27 +212,55 @@ public class AirportManager {
      * @param bookingId
      * @return 0 se nao existir , 1 se existir
      */
-    public int cancelBooking(String bookingId){
+    public boolean cancelBooking(String bookingId, String username){
         this.l.lock();
-        int res = 0;
+        boolean res = false;
+
+        User u = this.users.get(username);
+
+        if(!u.deleteBooking(bookingId)){
+            this.l.unlock();
+            return false;
+        }
+        this.users.put(u.getUsername(), u);
+
+
         for(Route r : this.routes){
             r.lock(); //obter lock de todas as routes
         }
         this.l.unlock(); //libertar o lock da classe airportManager
 
         for (Route r : this.routes){
-            res = r.cancelBooking(bookingId); //cancelar a reserva se existir nesta rota
+            if(r.cancelBooking(bookingId)) res = true; //cancelar a reserva se existir nesta rota
             r.unlock(); //libertar o lock de uma route -> opde ser adquirido por outra thread
         }
 
         return res; //
     }
 
-    /**
-     *
-     */
-    public void nextDay(){
-        this.day = this.day.plusDays(1);
+    
+    public List<List<Route>> allPossibleFlights(String origin, String destination){
+        
+        List<String> citiesVisited = new ArrayList<>();
+        List<List<Route>> possibleRoutes = new ArrayList<>();
+        List<Route> one_scale = new ArrayList<>();
+        boolean route_found = false;
+        
+        for(Route r : this.routes){
+            if(r.isCompatible(origin,destination)){
+                List<Route> direct_route = new ArrayList<>();
+                direct_route.add(r);
+                possibleRoutes.add(direct_route);
+                route_found = true;
+            }
+        }
+        for(Route r : this.routes){
+            if(){
+
+            }
+        }
+        
     }
+    
 
 }

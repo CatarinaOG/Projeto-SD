@@ -36,9 +36,11 @@ public class Flight {
         return 0;
     }
 
-    public void addBooking(String bookingID,LocalDate date, String origin,String destination, String userID){
+    public Booking addBooking(String bookingID,LocalDate date, String origin,String destination, String userID){
         this.occupancy++;
-        this.bookings.put(bookingID,new Booking(bookingID,date,origin,destination,userID));
+        Booking b = new Booking(bookingID,date,origin,destination,userID);
+        this.bookings.put(bookingID,b);
+        return b.clone();
     }
 
     public boolean hasSeat(int capacity){

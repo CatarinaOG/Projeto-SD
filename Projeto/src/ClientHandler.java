@@ -20,7 +20,7 @@ public class ClientHandler {
 
         menu.setHandler(1, this::loginNormal);
         menu.setHandler(2, this::loginGestor);
-        menu.setHandler(3, this::signIn);
+        menu.setHandler(3, this::signUp);
         menu.run();
 
     }
@@ -43,7 +43,7 @@ public class ClientHandler {
 
         if(this.in.readBoolean()){
             System.out.println("Access granted!");
-            String[] options = {"Book a Flight","List all flights", "Cancel Booking"};
+            String[] options = {"Book a Flight", "List all flights", "Cancel Booking"};
             Menu usersMenu = new Menu("User's Menu", options);
 
             usersMenu.setHandler(1,this::bookAFlight);
@@ -88,7 +88,7 @@ public class ClientHandler {
 
     }
 
-    public void signIn() throws IOException {
+    public void signUp() throws IOException {
         String username;
         String password;
 
@@ -104,7 +104,7 @@ public class ClientHandler {
         this.out.flush();
 
         if(this.in.readBoolean()) System.out.println("Sign Up succeeded!");
-
+        else System.out.println("Error signing up...");
     }
 
     public void addRoute() throws IOException {
@@ -124,8 +124,10 @@ public class ClientHandler {
         this.out.writeInt(capacity);
         this.out.flush();
 
-        String response = this.in.readUTF();
-        System.out.println("Response: " + response);
+        boolean response = this.in.readBoolean();
+
+        if(response) System.out.println("Routed created sucessfully");
+        else System.out.println("Creating route was not possible");
 
     }
 
@@ -134,9 +136,11 @@ public class ClientHandler {
         this.out.writeInt(5);
 
         System.out.println("Insert the date of the day you want to delete (Year-Month-Day)");
-        this.out.writeUTF(systemIn.nextLine());
+        String date = systemIn.nextLine();
+        this.out.writeUTF(date);
         out.flush();
 
+        System.out.println("Bookings for " + date + " were deleted!");
     }
 
     public void bookAFlight() throws IOException {
@@ -144,8 +148,18 @@ public class ClientHandler {
         this.out.writeInt(6);
 
         System.out.println("How many scales are needed?");
-        int nrScales = Integer.parseInt(systemIn.nextLine());
-        this.out.writeInt(nrScales);
+        boolean number_right = false;
+        int nrScales = 0;
+        while(!number_right){
+            try{
+                nrScales = Integer.parseInt(systemIn.nextLine());
+                number_right = true;
+                this.out.writeInt(nrScales);
+            }catch(NumberFormatException e){
+                System.out.println("Error::Input wasn't valid!");
+            }
+        }
+
 
         for( int i = 0 ; i< (nrScales+2) ; i++ ){
             System.out.println("Insert city " + (i+1));
@@ -161,8 +175,16 @@ public class ClientHandler {
 
         this.out.flush();
 
-        String response = this.in.readUTF();
-        System.out.println("Response: " + response);
+        String bookingId = this.in.readUTF();
+
+        switch (bookingId) {
+            case "1": System.out.println("There arent routes that apply to your flights"); break;
+            case "2": System.out.println("There aren't seats for all of your flights in the time span provided"); break;
+            default :
+                System.out.println("Your reservation is done, your reservation code is: " + bookingId);
+                System.out.println("Your flight was booked to: " + this.in.readUTF());
+                break;
+        }
 
 
     }

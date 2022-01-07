@@ -8,7 +8,7 @@ public class User {
 
     private String username;
     private String password;
-    private Map<String, Booking > bookings;
+    private Map<String, List<Booking>> bookings;
 
     public User(String username, String password){
         this.username = username;
@@ -16,11 +16,18 @@ public class User {
         this.bookings = new HashMap<>();
     }
 
-
-    public void deleteBooking(String idBooking){
-        this.bookings.remove(idBooking);
+    public boolean deleteBooking(String idBooking){
+        return (this.bookings.remove(idBooking) != null);
     }
 
+    public void addBooking(Booking b){
+        List<Booking> l;
+        if(!this.bookings.containsKey(b.getBookingId())) l = new ArrayList<>();
+        else l = this.bookings.get(b.getBookingId());
+
+        l.add(b);
+        this.bookings.put(b.getBookingId(), l);
+    }
 
     public String getUsername() {
         return username;
@@ -38,11 +45,11 @@ public class User {
         this.password = password;
     }
 
-    public Map<String, Booking> getBookings() {
+    public Map<String, List<Booking>> getBookings() {
         return this.bookings;
     }
 
-    public void setBookings(Map<String, Booking> bookings) {
+    public void setBookings(Map<String, List<Booking>> bookings) {
         this.bookings = bookings;
     }
 
