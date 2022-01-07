@@ -62,6 +62,7 @@ class ServerWorker implements Runnable {
                     case 6: bookFlight(username); break;
                     case 7: listAllFlights(); break;
                     case 8: cancelBooking(username); break;
+                    case 9: allPossibleFlights(); break;
                     default: break;
                 }
                 option = in.readInt();
@@ -225,6 +226,21 @@ class ServerWorker implements Runnable {
             e.printStackTrace();
         }
     }
+
+    public void allPossibleFlights(){
+
+        String origin = null;
+        String destination = null;
+        try {
+            origin = this.in.readUTF();
+            destination = this.in.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(this.manager.allPossibleFlights(origin, destination));
+    }
+
 
 }
 

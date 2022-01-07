@@ -43,12 +43,13 @@ public class ClientHandler {
 
         if(this.in.readBoolean()){
             System.out.println("Access granted!");
-            String[] options = {"Book a Flight", "List all flights", "Cancel Booking"};
+            String[] options = {"Book a Flight", "List all flights", "Cancel Booking", "All Possible Flights"};
             Menu usersMenu = new Menu("User's Menu", options);
 
-            usersMenu.setHandler(1,this::bookAFlight);
+            usersMenu.setHandler(1, this::bookAFlight);
             usersMenu.setHandler(2, this::listAllFlights);
             usersMenu.setHandler(3, this::cancelBooking);
+            usersMenu.setHandler(4, this::allPossibleFlights);
 
             usersMenu.run();
         }
@@ -222,5 +223,16 @@ public class ClientHandler {
     }
 
 
-
+    public void allPossibleFlights(){
+        try {
+            this.out.writeInt(9);
+            System.out.println("What's the origin of the flight?");
+            this.out.writeUTF(systemIn.nextLine());
+            System.out.println("What's the destination of the flight?");
+            this.out.writeUTF(systemIn.nextLine());
+            this.out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
