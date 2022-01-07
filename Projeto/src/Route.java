@@ -26,6 +26,7 @@ public class Route {
         this.origin = f.getOrigin();
         this.destination = f.getDestination();
         this.capacity = f.getCapacity();
+        this.flights = f.getFlights();
     }
 
 
@@ -119,12 +120,24 @@ public class Route {
         this.capacity = capacity;
     }
 
+    public Map<LocalDate, Flight> getFlights(){
+        Map<LocalDate, Flight> res = new HashMap<>();
+        for(Map.Entry<LocalDate,Flight> f : this.flights.entrySet()){
+            res.put(f.getKey(),f.getValue().clone());
+        }
+        return res;
+    }
+
     public String toString() {
         return "Flight{" +
                 ", origin='" + origin + '\'' +
                 ", destination='" + destination + '\'' +
                 ", capacity=" + capacity +
                 '}';
+    }
+
+    public Route clone(){
+        return new Route(this);
     }
 
 }

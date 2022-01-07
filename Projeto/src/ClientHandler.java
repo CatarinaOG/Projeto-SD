@@ -1,5 +1,8 @@
 import java.io.*;
+import java.net.Socket;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class ClientHandler {
@@ -176,6 +179,7 @@ public class ClientHandler {
 
         this.out.flush();
 
+
         String bookingId = this.in.readUTF();
 
         switch (bookingId) {
@@ -231,6 +235,19 @@ public class ClientHandler {
             System.out.println("What's the destination of the flight?");
             this.out.writeUTF(systemIn.nextLine());
             this.out.flush();
+
+            int n_routes = this.in.readInt();
+            System.out.println("There are " + n_routes + " routes available!");
+            int n_flights;
+            for(int i = 0; i < n_routes; i++){
+                n_flights = this.in.readInt();
+                for(int j = 0; j < n_flights; j++){
+                    System.out.print(this.in.readUTF() + " -> ");
+                }
+                System.out.println(this.in.readUTF());
+            }
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }

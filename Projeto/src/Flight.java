@@ -67,4 +67,8 @@ public class Flight {
     public void setBookings(Map<String, Booking> bookings) {
         this.bookings = bookings;
     }
+
+    public Flight clone(){
+        return new Flight(this);
+    }
 }

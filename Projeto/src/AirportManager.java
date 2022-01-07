@@ -226,9 +226,9 @@ public class AirportManager {
         this.users.put(u.getUsername(), u);
 
 
-        for(Route r : this.routes){
+        for(Route r : this.routes)
             r.lock(); //obter lock de todas as routes
-        }
+
         this.l.unlock(); //libertar o lock da classe airportManager
 
         for (Route r : this.routes){
@@ -244,37 +244,35 @@ public class AirportManager {
         
         List<String> citiesVisited = new ArrayList<>();
         List<List<Route>> possibleRoutes = new ArrayList<>();
+        this.l.lock();
+        for(Route r : this.routes) r.lock();
+        this.l.unlock();
 
-        for(Route r : this.routes){
+        for(Route r : this.routes){ // A -> X -> Y -> B
             // Se a rota analisada tiver início em A, considerar. Senão, passar à frente
             if(r.getOrigin().equals(origin)){ // se for uma rota de A para X
                 if(r.getDestination().equals(destination)){ // Se X for B, a rota é direta
                     List<Route> direct_route = new ArrayList<>();
-                    direct_route.add(r);
+                    direct_route.add(r.clone());
                     possibleRoutes.add(direct_route);
-                    System.out.println("Found a direct route: " + r.getOrigin() + " -> " + r.getDestination());
+
                 }
                 else{ // Senão, vamos a analisar rotas do tipo X para Y (ou seja, com início em X) -> r2.getOrigin().equals(r.getDestination())
                     for(Route r2 : this.routes){  // de todas as rotas, vamos ver se Y é destino ou não
                         if(r2.getOrigin().equals(r.getDestination()) && r2.getDestination().equals(destination)){ //Se esse Y for igual a B
                             List<Route> l = new ArrayList<>();
-                            l.add(r);
-                            l.add(r2);
+                            l.add(r.clone());
+                            l.add(r2.clone());
                             possibleRoutes.add(l);
-                            System.out.println("Found a route with 2 flights: " + r.getOrigin() + " -> " + r.getDestination() +
-                                    " / " + r2.getOrigin() + " -> " + r2.getDestination());
                         }
                         else{ // se Y não for B então vamos às rotas tentar encontrar rotas de Y para B (ou seja, com início em Y) -> r3.getOrigin().equals(r2.getDestination())
                             for(Route r3 : this.routes){ // rotas de Y para Z
                                 if(r3.getOrigin().equals(r2.getDestination()) && r2.getOrigin().equals(r.getDestination()) && r3.getDestination().equals(destination)){ // se este
                                     List<Route> l = new ArrayList<>();
-                                    l.add(r);
-                                    l.add(r2);
-                                    l.add(r3);
+                                    l.add(r.clone());
+                                    l.add(r2.clone());
+                                    l.add(r3.clone());
                                     possibleRoutes.add(l);
-                                    System.out.println("Found a route with 3 flights: " + r.getOrigin() + " -> " + r.getDestination() +
-                                                        " / " + r2.getOrigin() + " -> " + r2.getDestination() +
-                                                        " / " + r3.getOrigin() + " -> " + r3.getDestination());
                                 }
                             }
                         }
@@ -282,6 +280,8 @@ public class AirportManager {
                 }
             }
         }
+
+        for(Route r : this.routes) r.unlock();
         return possibleRoutes;
     }
 

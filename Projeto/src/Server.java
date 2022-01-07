@@ -229,16 +229,34 @@ class ServerWorker implements Runnable {
 
     public void allPossibleFlights(){
 
-        String origin = null;
-        String destination = null;
+        String origin;
+        String destination;
         try {
             origin = this.in.readUTF();
             destination = this.in.readUTF();
+
+            List<List<Route>> routeList = this.manager.allPossibleFlights(origin, destination);
+
+
+            // tamanho da rota + voo 1 + voo 2 + voo 3
+
+            this.out.writeInt(routeList.size());
+            for(List<Route> list : routeList){
+                this.out.writeInt(list.size());
+                this.out.writeUTF(list.get(0).getOrigin());
+                this.out.writeUTF(list.get(0).getDestination());
+                for(int i = 1; i < list.size(); i++){
+                    this.out.writeUTF(list.get(i).getDestination());
+                }
+            }
+            this.out.flush();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        System.out.println(this.manager.allPossibleFlights(origin, destination));
+
+
     }
 
 
