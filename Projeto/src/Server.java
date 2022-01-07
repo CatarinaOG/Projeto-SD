@@ -47,19 +47,19 @@ class ServerWorker implements Runnable {
     }
 
     public void run() {
-
+        String username = null;
         try {
 
             int option = in.readInt();
             while(option != 0) {
 
                 switch (option) {
-                    case 1: login(); break;
+                    case 1: username = login(); break;
                     case 2: loginGestor(); break;
                     case 3: signIn(); break;
                     case 4: addRoute(); break;
                     case 5: deleteBookingsDay(); break;
-                    case 6: bookFlight(); break;
+                    case 6: bookFlight(username); break;
                     case 7: listAllFlights(); break;
                     case 8: cancelBooking(); break;
                     default: break;
@@ -67,24 +67,25 @@ class ServerWorker implements Runnable {
                 option = in.readInt();
             }
         } catch(Exception e){
+            e.printStackTrace();
             System.out.println("Client Exited");
         }
 
     }
 
-    public void login() {
+    public String login() {
+        String username = null;
         try{
-            String username = in.readUTF();
+            username = in.readUTF();
             String password = in.readUTF();
 
-            if (manager.login(username, password)) out.writeUTF("Access legally accepted");
-            else out.writeUTF("Access accepted");
+            if (manager.login(username, password)) out.writeBoolean(true);
+            else out.writeBoolean(false);
             out.flush();
         }catch(IOException e){
             System.out.println("Error logging In");
         }
-
-
+        return username;
     }
 
     public void loginGestor() throws IOException {
@@ -94,24 +95,22 @@ class ServerWorker implements Runnable {
             String username = in.readUTF();
             String password = in.readUTF();
 
-            if (manager.loginGestor(username, password)) out.writeUTF("Acess accepted");
-            else out.writeUTF("Acess denied");
+            if (manager.loginGestor(username, password)) out.writeBoolean(true);
+            else out.writeBoolean(false);
             out.flush();
         }catch(IOException e) {
             System.out.println("Error loging in");
         }
-
     }
 
     public void signIn(){
 
         try {
-
             String username = in.readUTF();
             String password = in.readUTF();
 
             manager.addUser(username, password);
-            out.writeUTF("Sign in with sucess");
+            this.out.writeBoolean(true);
             out.flush();
 
         }catch( IOException e){
@@ -153,7 +152,7 @@ class ServerWorker implements Runnable {
 
     }
 
-    public void bookFlight(){
+    public void bookFlight(String userID){
 
         try {
 
@@ -167,9 +166,14 @@ class ServerWorker implements Runnable {
             LocalDate startDate = LocalDate.parse(in.readUTF());
             LocalDate endDate = LocalDate.parse(in.readUTF());
 
+            String bookingId;
 
-            if (manager.bookFlight(cities, startDate, endDate)) out.writeUTF("Flight booked!");
-            else out.writeUTF("Flight impossible to book!");
+            switch (bookingId = manager.bookFlight(cities, startDate, endDate,userID)) {
+                case "1": out.writeUTF("There arent routes that apply to your flights"); break;
+                case "2": out.writeUTF("There aren't seats for all of your flights in the time span provided"); break;
+                default : out.writeUTF("Your reservation is done, your reservation code is: " + bookingId); break;
+            }
+
             out.flush();
 
         }catch( IOException e){
@@ -188,8 +192,8 @@ class ServerWorker implements Runnable {
 
             String bookingId = in.readUTF(); //ler o id da reserva
             int existe = this.manager.cancelBooking(bookingId);
-            if(existe == 1) out.writeUTF("Reserva " + bookingId + "cancelada com sucesso!");
-            else out.writeUTF("Rserva com ID " + bookingId + " não existe!");
+            if(existe == 1) out.writeBoolean(true);
+            else out.writeBoolean(false);
 
         } catch (IOException e) {
             e.printStackTrace();

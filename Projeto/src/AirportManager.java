@@ -124,26 +124,51 @@ public class AirportManager {
      * @param endDate
      * @return
      */
-    public boolean bookFlight(List<String> cities, LocalDate startDate, LocalDate endDate){
+    public String bookFlight(List<String> cities, LocalDate startDate, LocalDate endDate, String userID){
 
-        int currentCity = 0;
-        for(int i = 0; i < cities.size()-1 ; i++){
+        List<Route> usedRoutes = new ArrayList<>();
 
-            //this.routes.stream().
+        boolean compatible;
 
+        for(int i = 0; i < cities.size()-1 ; i++) {
+            compatible = false;
+            for (Route r : routes) {
+                if (r.isCompatible(cities.get(i), cities.get(i+1))) {
+                    compatible = true;
+                    usedRoutes.add(r);
+                }
+            }
+            if (!compatible) return "1";
         }
 
 
-        return true;
-    }
+        boolean solution = true;
+        LocalDate sol = null;
+        for( LocalDate d = startDate ; d.isBefore(endDate) ; d = d.plusDays(1) ){
+            solution = true;
 
-    /**
-     *
-     */
-    public void nextDay(){
-        this.day = this.day.plusDays(1);
-    }
+            for( Route r : usedRoutes ){
+                if( !r.hasFlight(d) ) r.createFlight(d);
+                else if (!r.hasSeat(d)) solution = false;
+            }
 
+            if( solution ) {
+                sol = d;
+                break;
+            }
+        }
+
+        String bookingID;
+
+        if( !solution ) return "2";
+        else {
+            bookingID = UUID.randomUUID().toString();
+            for (Route r : usedRoutes)
+                r.bookFlight(bookingID, sol, userID);
+        }
+
+        return bookingID;
+    }
 
     /**
      * Metodo que envia a listagem das rotas disponiveis para voos
@@ -152,9 +177,13 @@ public class AirportManager {
     public void sendListAllFlights(DataOutputStream out){
         int n_flights = this.routes.size();
         try {
+            this.l.lock();                       // obter o lock do airport para certificar que nenhuma operação altera o estado das routes antes de as bloquear
             out.writeInt(n_flights);
+            for(Route r : this.routes) r.lock(); // obter o lock de todas as routes
+            this.l.unlock();                     // libertar o lock do airport
             for(Route r : this.routes){
                 r.serializeRoute(out);
+                r.unlock();                      // libertar o lock da route depois de a analisar
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,6 +209,13 @@ public class AirportManager {
         }
 
         return res; //
+    }
+
+    /**
+     *
+     */
+    public void nextDay(){
+        this.day = this.day.plusDays(1);
     }
 
 }

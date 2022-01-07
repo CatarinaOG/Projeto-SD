@@ -13,7 +13,7 @@ public class Route {
     private String origin;
     private String destination;
     private int capacity;
-    private Lock l = new ReentrantLock();
+    private Lock l;
     private Map<LocalDate,Flight> flights;
 
 
@@ -22,6 +22,7 @@ public class Route {
         this.destination = destination;
         this.capacity = capacity;
         this.flights = new HashMap<>();
+        this.l = new ReentrantLock(); //cada instancia de route tem um lock
     }
 
     public Route(Route f){
@@ -46,6 +47,55 @@ public class Route {
 
         }
     }
+
+    public void lock(){
+        this.l.lock();
+    }
+
+    public void unlock(){
+        this.l.unlock();
+    }
+
+    public int cancelBooking(String bookingId){
+        for(Flight f : this.flights.values()){
+            if(f.cancelBooking(bookingId) == 1) return 1;
+        }
+        return 0;
+    }
+
+    public boolean isCompatible(String origin, String destination){
+        return origin.equals(this.origin) && destination.equals(this.destination);
+    }
+
+    public boolean hasFlight(LocalDate date){
+        return flights.containsKey(date);
+    }
+
+    public void createFlight(LocalDate date){
+        flights.put(date,new Flight());
+    }
+
+    public Map<LocalDate, Flight> getFlightsBetweenDates(String origin, String destination, LocalDate startDate, LocalDate endDate){
+        Map<LocalDate, Flight> map = new HashMap<>();
+        for(Map.Entry<LocalDate, Flight> e : this.flights.entrySet()){
+            if(e.getKey().isAfter(startDate.plusDays(1)) && e.getKey().isBefore(endDate.minusDays(1)) && e.getValue().getOccupancy() < this.capacity){
+                map.put(e.getKey(), e.getValue());
+            }
+        }
+        return map;
+    }
+
+    public void bookFlight(String bookingID, LocalDate date,String userID){
+        Flight f = this.flights.get(date);
+        f.addBooking(bookingID, date, origin, destination, userID);
+        this.flights.put(date,f);
+    }
+
+    public boolean hasSeat(LocalDate date){
+
+        return flights.get(date).hasSeat(capacity);
+    }
+
 
 
     public Route copyFlight(){
@@ -84,18 +134,4 @@ public class Route {
                 '}';
     }
 
-    public void lock(){
-        this.l.lock();
-    }
-
-    public void unlock(){
-        this.l.unlock();
-    }
-
-    public int cancelBooking(String bookingId){
-        for(Flight f : this.flights.values()){
-            if(f.cancelBooking(bookingId) == 1) return 1;
-        }
-        return 0;
-    }
 }

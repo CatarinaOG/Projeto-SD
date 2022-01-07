@@ -41,17 +41,18 @@ public class ClientHandler {
         this.out.writeUTF(password);
         this.out.flush();
 
-        String response = this.in.readUTF();
-        System.out.println("Response: " + response);
+        if(this.in.readBoolean()){
+            System.out.println("Access granted!");
+            String[] options = {"Book a Flight","List all flights", "Cancel Booking"};
+            Menu usersMenu = new Menu("User's Menu", options);
 
-        String[] options = {"List all flights", "Book a flight", "Cancel Booking"};
-        Menu usersMenu = new Menu("User's Menu", options);
+            usersMenu.setHandler(1,this::bookAFlight);
+            usersMenu.setHandler(2, this::listAllFlights);
+            usersMenu.setHandler(3, this::cancelBooking);
 
-        usersMenu.setHandler(1, this::listAllFlights);
-        usersMenu.setHandler(3, this::cancelBooking);
-
-        usersMenu.run();
-
+            usersMenu.run();
+        }
+        else System.out.println("Access denied!");
 
     }
 
@@ -71,16 +72,19 @@ public class ClientHandler {
         this.out.writeUTF(password);
         this.out.flush();
 
-        String response = this.in.readUTF();
-        System.out.println("Response: " + response);
+        if(this.in.readBoolean()){
+            System.out.println("Access granted!");
+            String[] opcoes = {"Add route", "Delete bookings in a specific day"};
+            Menu menuGestor = new Menu("Admin Menu", opcoes);
 
-        String[] opcoes = {"Add route", "Delete bookings in a specific day"};
-        Menu menuGestor = new Menu("Admin Menu", opcoes);
+            menuGestor.setHandler(1, this::addRoute);
+            menuGestor.setHandler(2, this::deleteBookingsDay);
 
-        menuGestor.setHandler(1, this::addRoute);
-        menuGestor.setHandler(2, this::deleteBookingsDay);
+            menuGestor.run();
+        }
+        else System.out.println("Access denied!");
 
-        menuGestor.run();
+
 
     }
 
@@ -94,13 +98,12 @@ public class ClientHandler {
         System.out.println("Insert Password");
         password = systemIn.nextLine();
 
-        this.out.writeInt(3); // 2 -> tag de registo
+        this.out.writeInt(3); // 3 -> tag de registo
         this.out.writeUTF(username);
         this.out.writeUTF(password);
         this.out.flush();
 
-        String response = this.in.readUTF();
-        System.out.println("Response: " + response);
+        if(this.in.readBoolean()) System.out.println("Sign Up succeeded!");
 
     }
 
@@ -128,11 +131,41 @@ public class ClientHandler {
 
     public void deleteBookingsDay() throws IOException {
 
+        this.out.writeInt(5);
+
         System.out.println("Insert the date of the day you want to delete (Year-Month-Day)");
         this.out.writeUTF(systemIn.nextLine());
+        out.flush();
 
     }
 
+    public void bookAFlight() throws IOException {
+
+        this.out.writeInt(6);
+
+        System.out.println("How many scales are needed?");
+        int nrScales = Integer.parseInt(systemIn.nextLine());
+        this.out.writeInt(nrScales);
+
+        for( int i = 0 ; i< (nrScales+2) ; i++ ){
+            System.out.println("Insert city " + (i+1));
+            this.out.writeUTF(systemIn.nextLine());
+
+        }
+
+        System.out.println("Insert the date of the day to start the search (Year-Month-Day)");
+        this.out.writeUTF(systemIn.nextLine());
+
+        System.out.println("Insert the date of the day to end the search (Year-Month-Day)");
+        this.out.writeUTF(systemIn.nextLine());
+
+        this.out.flush();
+
+        String response = this.in.readUTF();
+        System.out.println("Response: " + response);
+
+
+    }
 
     public void listAllFlights(){
         try{
@@ -158,7 +191,8 @@ public class ClientHandler {
             this.out.writeInt(8);
             this.out.writeUTF(bookingId);
 
-            System.out.println(this.in.readUTF());
+            if(this.in.readBoolean()) System.out.println("Reserva " + bookingId + " cancelada com sucesso!");
+            else System.out.println("Reserva com ID " + bookingId + " não existe!");
         } catch (IOException e) {
             e.printStackTrace();
         }
