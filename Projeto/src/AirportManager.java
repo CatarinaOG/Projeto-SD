@@ -153,7 +153,7 @@ public class AirportManager {
 
         boolean solution = true;
         LocalDate sol = null;
-        for( LocalDate d = startDate ; d.isBefore(endDate) ; d = d.plusDays(1) ){
+        for( LocalDate d = startDate ; d.isBefore(endDate) || d.equals(endDate) ; d = d.plusDays(1) ){
             solution = true;
 
             for( Route r : usedRoutes ){
@@ -170,6 +170,8 @@ public class AirportManager {
         String bookingID;
         Booking b;
 
+        System.out.println(solution);
+
         if( !solution ){
             for(Route r : usedRoutes) r.unlock(); //libertar os locks das routes
             return new AbstractMap.SimpleEntry<>(null, "2");
@@ -182,7 +184,8 @@ public class AirportManager {
 
                 User u = users.get(b.getUsername());
                 u.addBooking(b);
-                users.put(b.getBookingId(),u);
+                users.put(u.getUsername(),u);
+                System.out.println(u.getBookings());
 
                 r.unlock();
             }

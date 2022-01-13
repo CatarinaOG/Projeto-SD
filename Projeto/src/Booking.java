@@ -18,6 +18,7 @@ public class Booking {
     }
 
     public Booking(Booking b){
+        this.bookingId = b.getBookingId();
         this.username = b.getUsername();
         this.flightDate = b.getFlightDate();
         this.origin = b.getOrigin();
@@ -63,6 +64,18 @@ public class Booking {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "bookingId='" + bookingId + '\'' +
+                ", flightDate=" + flightDate +
+                ", origin='" + origin + '\'' +
+                ", destination='" + destination + '\'' +
+                ", username='" + username + '\'' +
+                '}';
     }
 
     public Booking clone(){
