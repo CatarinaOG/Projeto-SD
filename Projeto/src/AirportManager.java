@@ -87,13 +87,15 @@ public class AirportManager {
      * @param origin
      * @param destination
      * @param capacity
-     * @return
+     * @return true se o voo for criado com sucesso, false se o voo já for um voo existente no sistema.
      */
     public boolean addRoute(String origin, String destination, int capacity){
 
         this.l.lock();
         try {
-            return (this.routes.add(new Route(origin, destination, capacity)));
+            Route routeToAdd = new Route(origin, destination, capacity);
+            for(Route r : this.routes) if(r.equals(routeToAdd)) return false;
+            return (this.routes.add(routeToAdd));
         }finally {
             this.l.unlock();
         }
@@ -109,7 +111,8 @@ public class AirportManager {
         this.l.lock();
 
         for(Route r : this.routes){
-            r.deleteBookings(date).stream().map(bookingsDeleted::add);
+            List<Booking> list = r.deleteBookings(date);
+            if(list != null) list.stream().map(bookingsDeleted::add);
         }
 
         for( Booking b : bookingsDeleted ){
@@ -153,7 +156,7 @@ public class AirportManager {
 
         boolean solution = true;
         LocalDate sol = null;
-        for( LocalDate d = startDate ; d.isBefore(endDate) || d.equals(endDate) ; d = d.plusDays(1) ){
+        for( LocalDate d = startDate ; d.isBefore(endDate) ; d = d.plusDays(1) ){
             solution = true;
 
             for( Route r : usedRoutes ){
@@ -170,8 +173,6 @@ public class AirportManager {
         String bookingID;
         Booking b;
 
-        System.out.println(solution);
-
         if( !solution ){
             for(Route r : usedRoutes) r.unlock(); //libertar os locks das routes
             return new AbstractMap.SimpleEntry<>(null, "2");
@@ -184,8 +185,7 @@ public class AirportManager {
 
                 User u = users.get(b.getUsername());
                 u.addBooking(b);
-                users.put(u.getUsername(),u);
-                System.out.println(u.getBookings());
+                users.put(b.getBookingId(),u);
 
                 r.unlock();
             }

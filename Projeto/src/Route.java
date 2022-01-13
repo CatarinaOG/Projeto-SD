@@ -31,7 +31,9 @@ public class Route {
 
 
     public List<Booking> deleteBookings(LocalDate date){
-        List<Booking> list = this.flights.get(date).getBookingsDay();
+        List<Booking> list = null;
+        Flight aux = this.flights.get(date);
+        if(aux != null) list =  aux.getBookingsDay();
         this.flights.put(date, null);
         return list;
     }
