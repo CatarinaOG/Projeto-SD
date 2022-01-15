@@ -156,7 +156,7 @@ public class AirportManager {
 
         boolean solution = true;
         LocalDate sol = null;
-        for( LocalDate d = startDate ; d.isBefore(endDate) ; d = d.plusDays(1) ){
+        for( LocalDate d = startDate ; d.isBefore(endDate) || d.equals(endDate); d = d.plusDays(1) ){
             solution = true;
 
             for( Route r : usedRoutes ){
