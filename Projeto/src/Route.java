@@ -84,8 +84,9 @@ public class Route {
     }
 
     public boolean hasSeat(LocalDate date){
-
-        return flights.get(date).hasSeat(capacity);
+        Flight f = flights.get(date);
+        if(f == null) return false;
+        else return f.hasSeat(capacity);
     }
 
     public boolean isNull(LocalDate date){
@@ -125,7 +126,8 @@ public class Route {
     public Map<LocalDate, Flight> getFlights(){
         Map<LocalDate, Flight> res = new HashMap<>();
         for(Map.Entry<LocalDate,Flight> f : this.flights.entrySet()){
-            res.put(f.getKey(),f.getValue().clone());
+            if(f.getValue() != null)
+                res.put(f.getKey(),f.getValue().clone());
         }
         return res;
     }
